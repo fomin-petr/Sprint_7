@@ -13,7 +13,8 @@ class TestCreateCourier:
             "firstName": first_name
         }
         response = requests.post((Urls.main_site + ApiHandles.create_courier), data=payload)
-        assert response.status_code == 201
+        assert response.status_code == 201 and response.json() == {"ok": True}
+        print(response.json())
         if response.status_code == 201:
             login_pass.append(login)
             login_pass.append(password)
@@ -21,10 +22,11 @@ class TestCreateCourier:
             courier_id = helper.login_existing_courier(login_pass)
             helper.delete_courier(courier_id)
 
-    def test_create_courier_existing_login_deny_status_code(self):
+    def test_create_courier_which_already_exist(self):
         payload = DataForTests.existing_user
         response = requests.post((Urls.main_site + ApiHandles.create_courier), data=payload)
-        assert response.status_code == 409
+        print(response.json())
+        assert response.status_code == 409 and response.json()["message"] == "Этот логин уже используется"
 
     def test_create_courier_with_login_and_pass_only_success(self):
         login = helper.generate_random_string(10)
@@ -35,7 +37,7 @@ class TestCreateCourier:
             "password": password
         }
         response = requests.post((Urls.main_site + ApiHandles.create_courier), data=payload)
-        assert response.status_code == 201
+        assert response.status_code == 201 and response.json() == {"ok": True}
         if response.status_code == 201:
             login_pass.append(login)
             login_pass.append(password)
@@ -68,7 +70,7 @@ class TestCreateCourier:
             "firstName": first_name
         }
         response = requests.post((Urls.main_site + ApiHandles.create_courier), data=payload)
-        assert response.status_code == 400
+        assert response.status_code == 400 and response.json()["message"] == "Недостаточно данных для создания учетной записи"
 
     def test_create_courier_with_pass_only_fail(self):
         password = helper.generate_random_string(10)
@@ -78,9 +80,16 @@ class TestCreateCourier:
             "firstName": first_name
         }
         response = requests.post((Urls.main_site + ApiHandles.create_courier), data=payload)
-        assert response.status_code == 400
+        assert response.status_code == 400 and response.json()["message"] == "Недостаточно данных для создания учетной записи"
 
-    def test_create_courier_existing_login_response_body(self):
-        payload = DataForTests.existing_user
-        response = requests.post((Urls.main_site + ApiHandles.create_courier), data=payload).json()
-        assert response["message"] == "Этот логин уже используется"
+    def test_create_courier_existing_login(self):
+        login = DataForTests.existing_user_login
+        password = helper.generate_random_string(10)
+        first_name = helper.generate_random_string(10)
+        payload = {
+            "login": login,
+            "password": password,
+            "firstName": first_name
+        }
+        response = requests.post((Urls.main_site + ApiHandles.create_courier), data=payload)
+        assert response.status_code == 409 and response.json()["message"] == "Этот логин уже используется"

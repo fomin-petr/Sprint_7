@@ -7,7 +7,7 @@ class TestLoginCourier:
     def test_login_existing_courier(self):
         payload = DataForTests.existing_user
         response = requests.post((Urls.main_site + ApiHandles.login_courier), data=payload)
-        assert response.status_code == 200
+        assert response.status_code == 200 and "id" in response.json().keys()
 
     def test_login_without_password(self):
         payload = {"login": DataForTests.existing_user_login}
@@ -44,5 +44,3 @@ class TestLoginCourier:
         payload = DataForTests.existing_user
         response = requests.post((Urls.main_site + ApiHandles.login_courier), data=payload).json()
         assert response["id"] == 237682
-
-
